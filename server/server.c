@@ -10,23 +10,21 @@
 
 #define DSK "./files/"
 
-int setup_server(char *port);
-int send_file(int sockfd, char *filename);
-int fetch_file(int sockfd, char *filename);
-int send_files_with_ext(int sockfd, char *ext);
-int fetch_files_with_ext(int sockfd, char *ext);
-int break_line(char *str, char *words[]);
-int ls(int sockfd);
-void error(const char *msg);
-void print(const char *msg);
+int start_server(char *port);
+int PUT(int sockfd, char *filename);
+int GET(int sockfd, char *filename);
+int MPUT(int sockfd, char *ext);
+int MGET(int sockfd, char *ext);
+int list(int sockfd);
 
 int main(int argc, char *argv[])
 {
     if (argc != 2)
     {
-        error("Usage: ./server <port>");
+        printf("Usage: ./server <port>\n");
+        exit(1);
     }
-    int serv = setup_server(argv[1]);
+    int serv = start_server(argv[1]);
 
     struct sockaddr_in cliAddr;
     socklen_t clilen;
@@ -37,10 +35,11 @@ int main(int argc, char *argv[])
 
     if (clifd < 0)
     {
-        error("Error connecting.");
+        printf("Error connecting.\n");
+        exit(1);
     }
 
-    print("CONNECTED.");
+    printf("CONNECTED.\n");
 
     char buffer[1000];
     char *args[10];
@@ -48,38 +47,38 @@ int main(int argc, char *argv[])
     {
         bzero(buffer, 1000);
         read(clifd, buffer, 1000);
-        print(buffer);
+        printf("%s\n", buffer);
         if (strcmp("GET", buffer) == 0)
         {
             write(clifd, "OK", 2);
             bzero(buffer, 1000);
             read(clifd, buffer, 1000);
-            send_file(clifd, buffer);
+            PUT(clifd, buffer);
         }
         else if (strcmp("PUT", buffer) == 0)
         {
             write(clifd, "OK", 2);
             bzero(buffer, 1000);
             read(clifd, buffer, 1000);
-            fetch_file(clifd, buffer);
+            GET(clifd, buffer);
         }
         else if (strcmp("MPUT", buffer) == 0)
         {
             write(clifd, "OK", 2);
             bzero(buffer, 1000);
             read(clifd, buffer, 1000);
-            fetch_files_with_ext(clifd, buffer);
+            MGET(clifd, buffer);
         }
         else if (strcmp("MGET", buffer) == 0)
         {
             write(clifd, "OK", 2);
             bzero(buffer, 1000);
             read(clifd, buffer, 1000);
-            send_files_with_ext(clifd, buffer);
+            MPUT(clifd, buffer);
         }
-        else if (strcmp("ls", buffer) == 0)
+        else if (strcmp("list", buffer) == 0)
         {
-            ls(clifd);
+            list(clifd);
         }
         else
         {
@@ -90,45 +89,17 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-// print error message and exit
-void error(const char *msg)
-{
-    printf("%s\n", msg);
-    exit(1);
-}
-
-void print(const char *msg)
-{
-    printf("%s\n", msg);
-}
-
-// break line into words
-int break_line(char *str, char *words[])
-{
-    str = strtok(str, "\n");
-
-    int k = 0;
-    char *ptr = strtok(str, " ");
-
-    while (ptr != NULL)
-    {
-        words[k++] = ptr;
-        ptr = strtok(NULL, " ");
-    }
-    return k;
-}
-
-int setup_server(char *port)
+int start_server(char *port)
 {
     int portno = atoi(port);
 
-    // Open socket
     int servfd = socket(AF_INET, SOCK_STREAM, 0); // Addr domain = IPv4,
     // Comm type = TCP, Protocol = Internet Protocol
 
     if (servfd < 0)
     {
-        error("Error opening socket.");
+        printf("Error opening socket.\n");
+        exit(1);
     }
 
     struct sockaddr_in servAddr;
@@ -140,17 +111,18 @@ int setup_server(char *port)
     // bind to port
     if (bind(servfd, (struct sockaddr *)&servAddr, sizeof(servAddr)))
     {
-        error("Bind failed. Possibly invalid Port Number.");
+        printf("Bind failed. Possibly invalid Port Number.\n");
+        exit(1);
     }
 
     listen(servfd, 5);
 
-    print("SERVER UP AND LISTENING.");
+    printf("SERVER UP AND LISTENING.");
 
     return servfd;
 }
 
-int send_file(int sockfd, char *filename)
+int PUT(int sockfd, char *filename)
 {
     char filepath[256]; // store file path
     bzero(filepath, 256);
@@ -210,7 +182,7 @@ end:
     return 0;
 }
 
-int fetch_file(int sockfd, char *filename)
+int GET(int sockfd, char *filename)
 {
     char buffer[1024];
     bzero(buffer, 1024);
@@ -280,7 +252,7 @@ int fetch_file(int sockfd, char *filename)
     return 0;
 }
 
-int ls(int sockfd)
+int list(int sockfd)
 {
     int count = 0;
     DIR *di;
@@ -296,7 +268,7 @@ int ls(int sockfd)
         read(sockfd, buffer, 32);
         if (strcmp("OK", buffer) != 0)
         {
-            print("ERROR");
+            printf("ERROR");
             break;
         }
         count++;
@@ -311,7 +283,7 @@ int ls(int sockfd)
     return 0;
 }
 
-int fetch_files_with_ext(int sockfd, char *extension)
+int MGET(int sockfd, char *extension)
 {
     write(sockfd, "OK", 2);
     char buffer[256];
@@ -323,13 +295,13 @@ int fetch_files_with_ext(int sockfd, char *extension)
             // Indicate all files sent from server
             break;
         else
-            fetch_file(sockfd, buffer);
+            GET(sockfd, buffer);
     }
     write(sockfd, "OK", 2);
     return 0;
 }
 
-int send_files_with_ext(int sockfd, char *extension)
+int MPUT(int sockfd, char *extension)
 {
     char buffer[256];
 
@@ -358,7 +330,7 @@ int send_files_with_ext(int sockfd, char *extension)
             write(sockfd, filename, strlen(filename));
             read(sockfd, buffer, 256);
             // send file
-            send_file(sockfd, filename);
+            PUT(sockfd, filename);
             read(sockfd, buffer, 256);
         }
     }
