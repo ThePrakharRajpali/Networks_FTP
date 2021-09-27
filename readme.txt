@@ -8,22 +8,38 @@ Students:
 
 File Structure:
 Client Folder
+    store (Files to be sent/recieved)
+    header
+        function.h
+        header.h 
     client.c
-    files
 
 Server Folder
+    store (Files to be sent/recieved)
+    header
+        function.h
+        header.h
     server.c
 
 Execution of code:
-1) Compilation: Run 2 instances of the terminal and execute server.c in one and client.c in another. Run: "gcc server.c -o server" & "gcc client.c -o client" on other.
-2) Execution: Run: "./server <port>" first in server terminal then "./client <ip address(server)> <server port>" in client terminal.
+1) Compilation: Run 2 instances of the terminal and execute server.c in one and client.c in another. Run: "gcc server.c -o server.o" & "gcc client.c -o client.o" on other.
+2) Execution: Run: "./server.o <port>" first in server terminal then "./client.o <ip address(server)> <server port>" in client terminal.
 
-Syntax: (.txt & .c files)
+Terminal 1:
+$ cd ./server 
+$ gcc server.c -o server.o
+$ ./server.o <PORT>
+
+Terminal 2:
+$ cd ./client 
+$ cd ./store
+$ touch <TEST FILES>
+$ cd ..
+$ gcc client.c -o client.o
+$ ./client.o <IP Address of Server> <PORT>
+
+Syntax: 
 1) PUT: PUT <file>
 2) GET: GET <file>
 3) MGET: MGET <extension> //don't include dot '.'
 4) MPUT: MPUT <extension> //don't include dot '.'
-5) quit: quit
-
-
-
