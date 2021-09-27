@@ -1,7 +1,0 @@
-{
-  "files.associations": {
-    "unistd.h": "c",
-    "function.h": "c",
-    "header.h": "c"
-  }
-}

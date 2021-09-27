@@ -10,19 +10,20 @@ File Structure:
 Client Folder
     store (Files to be sent/recieved)
     header
-        function.h
+        function.h (Implementation of functions) 
         header.h 
     client.c
 
 Server Folder
     store (Files to be sent/recieved)
     header
-        function.h
+        function.h (Implementation of functions)
         header.h
     server.c
 
 Execution of code:
-1) Compilation: Run 2 instances of the terminal and execute server.c in one and client.c in another. Run: "gcc server.c -o server.o" & "gcc client.c -o client.o" on other.
+
+1) Compilation: Run 2 instances of the terminal and execute server.c in one and client.c in another. Run: "gcc server.c -o server" & "gcc client.c -o client." on other.
 2) Execution: Run: "./server.o <port>" first in server terminal then "./client.o <ip address(server)> <server port>" in client terminal.
 
 Terminal 1:
@@ -32,9 +33,6 @@ $ ./server.o <PORT>
 
 Terminal 2:
 $ cd ./client 
-$ cd ./store
-$ touch <TEST FILES>
-$ cd ..
 $ gcc client.c -o client.o
 $ ./client.o <IP Address of Server> <PORT>
 
