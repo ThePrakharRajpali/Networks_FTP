@@ -1,4 +1,3 @@
-#include "header/header.h"
 #include "header/function.h"
 
 int main(int argc, char *argv[])
@@ -10,14 +9,14 @@ int main(int argc, char *argv[])
     }
     int serv = start_server(argv[1]);
 
-    struct sockaddr_in cliAddr;
-    socklen_t clilen;
+    struct sockaddr_in clientAddress;
+    socklen_t clientLen;
 
-    clilen = sizeof(cliAddr);
+    clientLen = sizeof(clientAddress);
 
-    int clifd = accept(serv, (struct sockaddr *)&cliAddr, &clilen);
+    int clientfd = accept(serv, (struct sockaddr *)&clientAddress, &clientLen);
 
-    if (clifd < 0)
+    if (clientfd < 0)
     {
         printf("Error connecting.\n");
         exit(1);
@@ -30,43 +29,39 @@ int main(int argc, char *argv[])
     while (1)
     {
         bzero(buffer, 1000);
-        read(clifd, buffer, 1000);
+        read(clientfd, buffer, 1000);
         printf("%s\n", buffer);
         if (strcmp("GET", buffer) == 0)
         {
-            write(clifd, "OK", 2);
+            write(clientfd, "OK", 2);
             bzero(buffer, 1000);
-            read(clifd, buffer, 1000);
-            PUT(clifd, buffer);
+            read(clientfd, buffer, 1000);
+            PUT(clientfd, buffer);
         }
         else if (strcmp("PUT", buffer) == 0)
         {
-            write(clifd, "OK", 2);
+            write(clientfd, "OK", 2);
             bzero(buffer, 1000);
-            read(clifd, buffer, 1000);
-            GET(clifd, buffer);
+            read(clientfd, buffer, 1000);
+            GET(clientfd, buffer);
         }
         else if (strcmp("MPUT", buffer) == 0)
         {
-            write(clifd, "OK", 2);
+            write(clientfd, "OK", 2);
             bzero(buffer, 1000);
-            read(clifd, buffer, 1000);
-            MGET(clifd, buffer);
+            read(clientfd, buffer, 1000);
+            MGET(clientfd, buffer);
         }
         else if (strcmp("MGET", buffer) == 0)
         {
-            write(clifd, "OK", 2);
+            write(clientfd, "OK", 2);
             bzero(buffer, 1000);
-            read(clifd, buffer, 1000);
-            MPUT(clifd, buffer);
-        }
-        else if (strcmp("list", buffer) == 0)
-        {
-            list(clifd);
+            read(clientfd, buffer, 1000);
+            MPUT(clientfd, buffer);
         }
         else
         {
-            write(clifd, "ERROR", 5);
+            write(clientfd, "ERROR", 5);
             continue;
         }
     }

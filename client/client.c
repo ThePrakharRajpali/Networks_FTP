@@ -1,4 +1,3 @@
-#include "header/header.h"
 #include "header/function.h"
 
 int main(int argc, char *argv[])
@@ -15,7 +14,7 @@ int main(int argc, char *argv[])
     char command[1000], buffer[1000];
     char *args[10];
 
-    while (1)
+    while (true)
     {
         bzero(command, 1000);
         bzero(buffer, 1000);
@@ -118,19 +117,6 @@ int main(int argc, char *argv[])
                 write(sockfd, args[1], strlen(args[1]));
 
                 MGET(sockfd, args[1]);
-            }
-        }
-        else if (strcmp("list", args[0]) == 0)
-        {
-            if (cargs != 1)
-            {
-                printf("Invalid Syntax.\n");
-            }
-            else
-            {
-                write(sockfd, args[0], strlen(args[0]));
-
-                list(sockfd);
             }
         }
         else if (strcmp("exit", args[0]) == 0)

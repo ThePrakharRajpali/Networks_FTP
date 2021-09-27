@@ -2,33 +2,33 @@
 
 int start_server(char *port)
 {
-    int portno = atoi(port);
+    int portNum = atoi(port);
 
-    int servfd = socket(AF_INET, SOCK_STREAM, 0);
+    int serverfd = socket(AF_INET, SOCK_STREAM, 0);
 
-    if (servfd < 0)
+    if (serverfd < 0)
     {
         printf("Error opening socket.\n");
         exit(1);
     }
 
-    struct sockaddr_in servAddr;
+    struct sockaddr_in serverAddr;
 
-    servAddr.sin_family = AF_INET;
-    servAddr.sin_addr.s_addr = INADDR_ANY;
-    servAddr.sin_port = htons(portno);
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_addr.s_addr = INADDR_ANY;
+    serverAddr.sin_port = htons(portNum);
 
-    if (bind(servfd, (struct sockaddr *)&servAddr, sizeof(servAddr)))
+    if (bind(serverfd, (struct sockaddr *)&serverAddr, sizeof(serverAddr)))
     {
         printf("Bind failed. Possibly invalid Port Number.\n");
         exit(1);
     }
 
-    listen(servfd, 5);
+    listen(serverfd, 5);
 
     printf("SERVER UP AND LISTENING.");
 
-    return servfd;
+    return serverfd;
 }
 
 int PUT(int sockfd, char *filename)
@@ -154,39 +154,11 @@ int GET(int sockfd, char *filename)
     return 0;
 }
 
-int list(int sockfd)
-{
-    int count = 0;
-    DIR *di;
-    struct dirent *dir;
-    di = opendir(STORE);
-    char buffer[32];
-    while ((dir = readdir(di)) != NULL)
-    {
-        write(sockfd, dir->d_name, strlen(dir->d_name));
-        bzero(buffer, 32);
-        read(sockfd, buffer, 32);
-        if (strcmp("OK", buffer) != 0)
-        {
-            printf("ERROR");
-            break;
-        }
-        count++;
-    }
-    write(sockfd, "DONE", 4);
-    bzero(buffer, 32);
-    read(sockfd, buffer, 32);
-    bzero(buffer, 32);
-    sprintf(buffer, "%d file(s).", count);
-    write(sockfd, buffer, strlen(buffer));
-    return 0;
-}
-
 int MGET(int sockfd, char *extension)
 {
     write(sockfd, "OK", 2);
     char buffer[256];
-    while (1)
+    while (true)
     {
         bzero(buffer, 256);
         read(sockfd, buffer, 256);
@@ -222,7 +194,6 @@ int MPUT(int sockfd, char *extension)
         {
             strcat(filename, ".");
             strcat(filename, extension);
-
             write(sockfd, filename, strlen(filename));
             read(sockfd, buffer, 256);
             PUT(sockfd, filename);

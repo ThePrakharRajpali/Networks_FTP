@@ -223,30 +223,6 @@ end:
     return 0;
 }
 
-int list(int sockfd)
-{
-    char buffer[256];
-    while (1)
-    {
-        bzero(buffer, 256);
-        read(sockfd, buffer, 256);
-
-        if (strcmp(buffer, "DONE") == 0)
-            break;
-
-        printf("%s\n", buffer);
-
-        write(sockfd, "OK", 2);
-    }
-    printf("\n");
-    write(sockfd, "OK", 2);
-    bzero(buffer, 256);
-    read(sockfd, buffer, 256);
-    printf("%s\n", buffer);
-    printf("\n");
-    return 0;
-}
-
 int MPUT(int sockfd, char *extension)
 {
     printf("Sending files with %s extension.\n", extension);
